@@ -1,4 +1,4 @@
-package com.linkedin.datahub.upgrade.common_steps;
+package com.linkedin.datahub.upgrade.commonsteps;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +15,7 @@ import java.net.URLConnection;
 import java.util.function.Function;
 
 
-public class GMSQualificationStep implements UpgradeStep {
+public class MAEQualificationStep implements UpgradeStep {
 
   private static String convertStreamToString(InputStream is) {
 
@@ -39,11 +39,11 @@ public class GMSQualificationStep implements UpgradeStep {
     return sb.toString();
   }
 
-  public GMSQualificationStep() { }
+  public MAEQualificationStep() { }
 
   @Override
   public String id() {
-    return "GMSQualificationStep";
+    return "MAEQualificationStep";
   }
 
   @Override
@@ -54,10 +54,10 @@ public class GMSQualificationStep implements UpgradeStep {
   @Override
   public Function<UpgradeContext, UpgradeStepResult> executable() {
     return (context) -> {
-      String gmsHost = System.getenv("DATAHUB_GMS_HOST") == null ? "localhost" : System.getenv("DATAHUB_GMS_HOST");
-      String gmsPort = System.getenv("DATAHUB_GMS_PORT") == null ? "8080" : System.getenv("DATAHUB_GMS_PORT");
+      String maeHost = System.getenv("DATAHUB_MAE_CONSUMER_HOST") == null ? "localhost" : System.getenv("DATAHUB_MAE_CONSUMER_HOST");
+      String maePort = System.getenv("DATAHUB_MAE_CONSUMER_PORT") == null ? "9091" : System.getenv("DATAHUB_MAE_CONSUMER_PORT");
       try {
-        String spec = String.format("http://%s:%s/config", gmsHost, gmsPort);
+        String spec = String.format("http://%s:%s/config", maeHost, maePort);
 
         URLConnection gmsConnection = new URL(spec).openConnection();
         InputStream response = gmsConnection.getInputStream();
@@ -66,26 +66,21 @@ public class GMSQualificationStep implements UpgradeStep {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode configJson = mapper.readTree(responseString);
         if (configJson.get("noCode").asBoolean()) {
-          return new DefaultUpgradeStepResult(
-              id(),
-              UpgradeStepResult.Result.SUCCEEDED);
+          context.report().addLine("MAE Consumer is running and up to date. Proceeding with upgrade...");
+          return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.SUCCEEDED);
         } else {
-          context.report().addLine(String.format("Failed to qualify GMS. It is not running on the latest version."
-              + "Re-run GMS on the latest datahub release"));
-          return new DefaultUpgradeStepResult(
-              id(),
-              UpgradeStepResult.Result.FAILED);
+          context.report().addLine(String.format("Failed to qualify MAE Consumer. It is not running on the latest version."
+              + "Re-run MAE Consumer on the latest datahub release"));
+          return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.FAILED);
         }
       } catch (Exception e) {
         e.printStackTrace();
-        context.report().addLine(String.format("ERROR: Cannot connect to GMS"
-                + "at host %s port %s. Make sure GMS is on the latest version "
+        context.report().addLine(String.format(
+            "ERROR: Cannot connect to MAE Consumer"
+                + "at host %s port %s. Make sure MAE Consumer is on the latest version "
                 + "and is running at that host before starting the migration.",
-            gmsHost,
-            gmsPort));
-        return new DefaultUpgradeStepResult(
-            id(),
-            UpgradeStepResult.Result.FAILED);
+            maeHost, maePort));
+        return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.FAILED);
       }
     };
   }

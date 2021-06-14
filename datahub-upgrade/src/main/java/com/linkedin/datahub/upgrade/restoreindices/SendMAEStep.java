@@ -1,4 +1,4 @@
-package com.linkedin.datahub.upgrade.restore_indices;
+package com.linkedin.datahub.upgrade.restoreindices;
 
 import com.linkedin.common.AuditStamp;
 import com.linkedin.common.urn.Urn;

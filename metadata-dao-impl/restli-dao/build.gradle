@@ -8,6 +8,7 @@ dependencies {
   compile externalDependency.gmaDaoApiDataTemplate
   compile externalDependency.gmaRestliResources
   compile externalDependency.gmaRestliResourcesDataTemplate
+  compile externalDependency.nettyAll
   compile spec.product.pegasus.restliClient
   compile spec.product.pegasus.restliCommon
 

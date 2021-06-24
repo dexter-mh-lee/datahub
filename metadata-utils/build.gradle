@@ -7,6 +7,7 @@ dependencies {
   compile externalDependency.gmaDaoApi
   compile externalDependency.httpClient
   compile externalDependency.neo4jJavaDriver
+  compile externalDependency.nettyAll
 
   compile spec.product.pegasus.restliClient
   compile spec.product.pegasus.restliCommon
